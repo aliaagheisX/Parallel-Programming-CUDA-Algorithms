@@ -1,7 +1,6 @@
 # Matrix Transpose
 ![matrix transpose](assets/image.png)
 
-
 * `OUT_TILE(x, y) = IN_TILE(y, x)`
     * `IN_TILE_X = blockDim.x, IN_TILE_Y = blockDim.y` 
     * `OUT_TILE_X = blockDim.y, OUT_TILE_Y = blockDim.x `
