@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CUDA C++: Launch",
+            "type": "cuda-gdb",
+            "request": "launch",
+            "program": "${workspaceFolder}/main",
+            "preLaunchTask": "build",
+            "cwd": "${workspaceFolder}",
+            "debuggerPath": "/usr/local/cuda-12.8/bin/cuda-gdb",
+            "args": [], // Add any program arguments if needed
+            "environment": [
+                { "name": "CUDA_DEBUGGER_SOFT_QUIT", "value": "1" } // Helps with clean exits
+            ],
+            "console": "integratedTerminal", // Use integrated terminal for better output
+            "stopAtEntry": true // Stop at program entry for easier debugging
+        },
+        {
+            "name": "CUDA C++: Attach",
+            "type": "cuda-gdb",
+            "request": "attach",
+            "debuggerPath": "/usr/local/cuda-12.8/bin/cuda-gdb"
+        }
+    ]
+}

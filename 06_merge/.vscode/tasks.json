@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "nvcc -g -o main main.cu",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$nvcc"],
+            "detail": "Compile CUDA program with nvcc"
+        }
+    ]
+}

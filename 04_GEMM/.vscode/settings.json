@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.world": "xml",
+        "array": "cpp",
+        "initializer_list": "cpp"
+    }
+}

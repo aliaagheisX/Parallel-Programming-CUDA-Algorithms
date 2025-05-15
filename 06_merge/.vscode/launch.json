@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CUDA C++: Launch",
+            "type": "cuda-gdb",
+            "request": "launch",
+            "program": "${workspaceFolder}/main", // Path to the compiled executable
+            "preLaunchTask": "build", // Task to compile the CUDA program before launching
+            "cwd": "${workspaceFolder}", // Working directory
+            "debuggerPath": "/usr/local/cuda-12.8/bin/cuda-gdb" // Path to cuda-gdb (adjust if needed)
+        },
+        {
+            "name": "CUDA C++: Attach",
+            "type": "cuda-gdb",
+            "request": "attach",
+            "debuggerPath": "/usr/local/cuda-12.8/bin/cuda-gdb" // Path to cuda-gdb (adjust if needed)
+        }
+    ]
+}

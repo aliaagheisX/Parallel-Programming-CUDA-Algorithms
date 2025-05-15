@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.world": "xml",
+        "cstdint": "cpp",
+        "iostream": "cpp"
+    }
+}
