@@ -1,3 +1,5 @@
+#include <cooperative_groups.h>
+
 #define DP_BLOCK_DIM 1024
 #define DRIVER_BLOCK_DIM 128
 
@@ -42,7 +44,7 @@ __global__ void bfs_vertix_dp(int* nodesPtr, int* neighbors, int* levels, int cu
 
 __global__ void bfs_dp_driver_kernel(int* nodesPtr, int* neighbors, int* levels, int* prev_frontier, int* curr_frontier, int* sz_prev_frontier, int* sz_curr_frontier) {
     int curr_level = 1;
-    // // Initialize cooperative groups grid group
+    // Initialize cooperative groups grid group
     cooperative_groups::grid_group grid = cooperative_groups::this_grid();
     
     while (*sz_prev_frontier > 0) {
