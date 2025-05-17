@@ -21,7 +21,7 @@ __global__ void bfs_vertix_dp(int* nodesPtr, int* neighbors, int* levels, int cu
                               const int sz_prev_frontier, int* sz_curr_frontier) {
     int nodeIdxinFrontier = threadIdx.x + blockIdx.x * blockDim.x;
     if (nodeIdxinFrontier < sz_prev_frontier) {
-        printf("AGGGG\n");
+        // printf("AGGGG\n");
         int node = prev_frontier[nodeIdxinFrontier];
         int start = nodesPtr[node], end = nodesPtr[node + 1];
 
@@ -42,11 +42,14 @@ __global__ void bfs_vertix_dp(int* nodesPtr, int* neighbors, int* levels, int cu
     }
 }
 
+
+__device__ int flag_sync = 0;
+__global__ void bfs_swap() {
+    atomicOr(&flag_sync, 1);
+}
+
 __global__ void bfs_dp_driver_kernel(int* nodesPtr, int* neighbors, int* levels, int* prev_frontier, int* curr_frontier, int* sz_prev_frontier, int* sz_curr_frontier) {
     int curr_level = 1;
-    // Initialize cooperative groups grid group
-    cooperative_groups::grid_group grid = cooperative_groups::this_grid();
-    
     while (*sz_prev_frontier > 0) {
     //     printf("MAHAHAHAA\n");
         dim3 threads(DRIVER_BLOCK_DIM);
@@ -54,9 +57,10 @@ __global__ void bfs_dp_driver_kernel(int* nodesPtr, int* neighbors, int* levels,
         bfs_vertix_dp<<<blocks, threads>>>(nodesPtr, neighbors, levels, curr_level,
                                            prev_frontier, curr_frontier,
                                            *sz_prev_frontier, sz_curr_frontier);
-        grid.sync();
+        bfs_swap<<<1, 1>>>();
 
-        // Swap frontiers
+        while(!atomicAnd(&flag_sync, 0)) {};
+
         int* temp = prev_frontier;
         prev_frontier = curr_frontier;
         curr_frontier = temp;
@@ -64,6 +68,6 @@ __global__ void bfs_dp_driver_kernel(int* nodesPtr, int* neighbors, int* levels,
         *sz_prev_frontier = *sz_curr_frontier;
         *sz_curr_frontier = 0;
 
-        curr_level++;
+        curr_level = (curr_level)+1;
     }
 }

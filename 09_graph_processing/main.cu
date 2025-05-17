@@ -299,9 +299,9 @@ int main(int argc, char* argv[]) {
             CHECK_CUDA_ERROR(cudaFree(d_curr_level));
         } 
         else if (kernel_name == "opt_dp_driver") {
-            void* kernelArgs[] = { &d_nodePtrs, &d_neighbors, &d_levels, &d_prev_frontier, &d_curr_frontier, &d_sz_prev_frontier, &d_sz_curr_frontier };
-            CHECK_CUDA_ERROR(cudaLaunchCooperativeKernel((void*)bfs_dp_driver_kernel, 1, 1, kernelArgs));
-            // bfs_dp_driver_kernel<<<1,1>>>(d_nodePtrs, d_neighbors, d_levels, d_prev_frontier, d_curr_frontier, d_sz_prev_frontier, d_sz_curr_frontier);
+            // void* kernelArgs[] = { &d_nodePtrs, &d_neighbors, &d_levels, &d_prev_frontier, &d_curr_frontier, &d_sz_prev_frontier, &d_sz_curr_frontier };
+            // CHECK_CUDA_ERROR(cudaLaunchCooperativeKernel((void*)bfs_dp_driver_kernel, 1, 1, kernelArgs));
+            bfs_dp_driver_kernel<<<1,1>>>(d_nodePtrs, d_neighbors, d_levels, d_prev_frontier, d_curr_frontier, d_sz_prev_frontier, d_sz_curr_frontier);
             CHECK_CUDA_ERROR(cudaDeviceSynchronize());
             CHECK_CUDA_ERROR(cudaMemcpy(gpu_levels.data(), d_levels, num_vertices * sizeof(int), cudaMemcpyDeviceToHost));
         }
