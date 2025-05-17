@@ -1,5 +1,5 @@
 NVCC = nvcc
-NVCC_FLAGS = -O3 -arch=sm_86
+NVCC_FLAGS = -O3 -arch=sm_86 -rdc=true -lcudadevrt --default-stream per-thread
 # KERNEL_FILES = vertix_centeric.cu edge_centeric.cu vertix_centeric_optimizations.cu
 TARGET = bfs_test
 # GRAPH_FILE = roadNet-CA.txt
@@ -10,8 +10,8 @@ all: build run_all
 build:
 	$(NVCC) $(NVCC_FLAGS) -o $(TARGET) main.cu
 
-run_all: run_top_down run_bottom_up run_edge run_edge_stream run_opt run_reg_priv run_block_priv run_opt3
-run_all_no_priv: run_top_down run_bottom_up run_edge run_edge_stream
+run_all: run_top_down run_bottom_up run_edge run_edge_stream run_opt run_reg_priv run_block_priv run_opt3 run_opt_dp run_opt_dp_driver
+run_all_no_priv: run_top_down run_bottom_up run_edge run_edge_stream run_opt run_opt_dp run_opt_dp_driver
 
 run_top_down: build
 	@echo "Running top_down kernel..."
@@ -26,12 +26,20 @@ run_edge: build
 	./$(TARGET) edge $(GRAPH_FILE)
 
 run_edge_stream: build
-	@echo "Running edge kernel..."
+	@echo "Running edge stream kernel..."
 	./$(TARGET) edge_stream $(GRAPH_FILE)
 
 run_opt: build
 	@echo "Running opt kernel..."
 	./$(TARGET) opt $(GRAPH_FILE)
+
+run_opt_dp: build
+	@echo "Running opt_dp kernel..."
+	./$(TARGET) opt_dp $(GRAPH_FILE)
+
+run_opt_dp_driver: build
+	@echo "Running opt_dp_driver kernel..."
+	./$(TARGET) opt_dp_driver $(GRAPH_FILE)
 
 run_reg_priv: build
 	@echo "Running reg_priv kernel..."

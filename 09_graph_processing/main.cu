@@ -6,9 +6,11 @@
 #include <chrono>
 #include <queue>
 #include <cstring>
+#include <cooperative_groups.h>
 
 #include "edge_centeric.cu"
 #include "vertix_centeric.cu"
+#include "dynamic_programming.cu"
 #include "vertix_centeric_optimizations.cu"
 // Constants from provided files
 #define CEIL_DIV(X, Y) ((X + Y - 1) / Y)
@@ -129,6 +131,13 @@ bool verify_levels(const std::vector<int>& cpu_levels, const int* gpu_levels, in
 
 
 int main(int argc, char* argv[]) {
+    // cudaDeviceProp prop;
+    // cudaGetDeviceProperties(&prop, 0);
+    // printf("Device: %s\n", prop.name);
+    // printf("Compute capability: %d.%d\n", prop.major, prop.minor);
+    // printf("Cooperative launch: %s\n", 
+    //     prop.cooperativeLaunch ? "Yes" : "No");
+
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <kernel_name> <graph_file>" << std::endl;
         std::cerr << "Kernel names: top_down, bottom_up, edge, opt, reg_priv, block_priv, opt3" << std::endl;
@@ -137,9 +146,9 @@ int main(int argc, char* argv[]) {
 
     std::string kernel_name = argv[1];
     std::string graph_file = argv[2];
-    std::vector<std::string> valid_kernels = {"top_down", "bottom_up", "edge", "edge_stream", "opt", "reg_priv", "block_priv", "opt3"};
+    std::vector<std::string> valid_kernels = {"top_down", "bottom_up", "edge", "edge_stream", "opt", "opt_dp", "opt_dp_driver", "reg_priv", "block_priv", "opt3"};
     if (std::find(valid_kernels.begin(), valid_kernels.end(), kernel_name) == valid_kernels.end()) {
-        std::cerr << "Invalid kernel name: " << kernel_name << std::endl;
+        std::cerr << "Invalid kernel name: '" << kernel_name << "'" << std::endl;
         return 1;
     }
 
@@ -159,6 +168,7 @@ int main(int argc, char* argv[]) {
     double cpu_time = std::chrono::duration<double, std::milli>(cpu_end - cpu_start).count();
     std::cout << "CPU BFS time: " << cpu_time << " ms" << std::endl;
     // ============= start GPU TIME ==============
+    cudaDeviceSetLimit(cudaLimitDevRuntimePendingLaunchCount, num_vertices);
     float gpu_time = 0;
     std::vector<int> gpu_levels(num_vertices);
 
@@ -287,12 +297,24 @@ int main(int argc, char* argv[]) {
             CHECK_CUDA_ERROR(cudaDeviceSynchronize());
             CHECK_CUDA_ERROR(cudaMemcpy(gpu_levels.data(), d_levels, num_vertices * sizeof(int), cudaMemcpyDeviceToHost));
             CHECK_CUDA_ERROR(cudaFree(d_curr_level));
+        } 
+        else if (kernel_name == "opt_dp_driver") {
+            void* kernelArgs[] = { &d_nodePtrs, &d_neighbors, &d_levels, &d_prev_frontier, &d_curr_frontier, &d_sz_prev_frontier, &d_sz_curr_frontier };
+            CHECK_CUDA_ERROR(cudaLaunchCooperativeKernel((void*)bfs_dp_driver_kernel, 1, 1, kernelArgs));
+            // bfs_dp_driver_kernel<<<1,1>>>(d_nodePtrs, d_neighbors, d_levels, d_prev_frontier, d_curr_frontier, d_sz_prev_frontier, d_sz_curr_frontier);
+            CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+            CHECK_CUDA_ERROR(cudaMemcpy(gpu_levels.data(), d_levels, num_vertices * sizeof(int), cudaMemcpyDeviceToHost));
         }
         else {
             int curr_level = 1;
             while (h_sz_prev_frontier > 0) {
                 if (kernel_name == "opt") {
                     bfs_vertix_opt<<<CEIL_DIV_I(h_sz_prev_frontier, BLOCK_DIM_OPT), BLOCK_DIM_OPT>>>(
+                        d_nodePtrs, d_neighbors, d_levels, curr_level,
+                        d_prev_frontier, d_curr_frontier, h_sz_prev_frontier, d_sz_curr_frontier);
+                }
+                else if (kernel_name == "opt_dp") {
+                    bfs_vertix_dp<<<CEIL_DIV_I(h_sz_prev_frontier, BLOCK_DIM_OPT), BLOCK_DIM_OPT>>>(
                         d_nodePtrs, d_neighbors, d_levels, curr_level,
                         d_prev_frontier, d_curr_frontier, h_sz_prev_frontier, d_sz_curr_frontier);
                 }

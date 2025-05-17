@@ -1,57 +1,64 @@
-nvcc -O3 -arch=sm_86 -o bfs_test main.cu
+nvcc -O3 -arch=sm_86 -rdc=true -lcudadevrt -o bfs_test main.cu
 Running top_down kernel...
 ./bfs_test top_down roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 76.7569 ms
-GPU top_down time: 60.0207 ms
+CPU BFS time: 76.0857 ms
+GPU top_down time: 235.51 ms
 top_down passed verification.
 Running bottom_up kernel...
 ./bfs_test bottom_up roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 96.1048 ms
-GPU bottom_up time: 115.765 ms
+CPU BFS time: 74.2352 ms
+GPU bottom_up time: 266.864 ms
 bottom_up passed verification.
 Running edge kernel...
 ./bfs_test edge roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 88.7499 ms
-GPU edge time: 171.547 ms
+CPU BFS time: 75.3118 ms
+GPU edge time: 284.896 ms
 edge passed verification.
-Running edge kernel...
+Running edge stream kernel...
 ./bfs_test edge_stream roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 77.7781 ms
-GPU edge_stream time: 7361.66 ms
+CPU BFS time: 75.7742 ms
+GPU edge_stream time: 7342.69 ms
 edge_stream passed verification.
 Running opt kernel...
 ./bfs_test opt roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 78.5499 ms
-GPU opt time: 57.6418 ms
+CPU BFS time: 77.5797 ms
+GPU opt time: 253.321 ms
 opt passed verification.
 Running reg_priv kernel...
 ./bfs_test reg_priv roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 78.4332 ms
-GPU reg_priv time: 58.4322 ms
+CPU BFS time: 84.2845 ms
+GPU reg_priv time: 201.799 ms
 reg_priv passed verification.
 Running block_priv kernel...
 ./bfs_test block_priv roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 77.6356 ms
-GPU block_priv time: 769.377 ms
+CPU BFS time: 81.526 ms
+GPU block_priv time: 899.391 ms
 block_priv passed verification.
 Running opt3 kernel...
 ./bfs_test opt3 roadNet-CA.txt
 MAX DEGREE: 24
 Graph loaded: 1971281 vertices, 5533214 edges
-CPU BFS time: 84.0008 ms
-GPU opt3 time: 794.784 ms
+CPU BFS time: 78.7037 ms
+GPU opt3 time: 973.398 ms
 opt3 passed verification.
+Running opt_dp kernel...
+./bfs_test opt_dp roadNet-CA.txt
+MAX DEGREE: 24
+Graph loaded: 1971281 vertices, 5533214 edges
+CPU BFS time: 73.8799 ms
+GPU opt_dp time: 202.635 ms
+opt_dp passed verification.

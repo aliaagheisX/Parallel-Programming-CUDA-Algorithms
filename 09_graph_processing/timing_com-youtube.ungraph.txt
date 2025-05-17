@@ -1,29 +1,49 @@
-nvcc -O3 -arch=sm_86 -o bfs_test main.cu
+nvcc -O3 -arch=sm_86 -rdc=true -lcudadevrt --default-stream per-thread -o bfs_test main.cu
 Running top_down kernel...
 ./bfs_test top_down com-youtube.ungraph.txt
 MAX DEGREE: 28754
 Graph loaded: 1157828 vertices, 2987624 edges
-CPU BFS time: 50.9287 ms
-GPU top_down time: 20.852 ms
+CPU BFS time: 87.7465 ms
+GPU top_down time: 214.495 ms
 top_down passed verification.
 Running bottom_up kernel...
 ./bfs_test bottom_up com-youtube.ungraph.txt
 MAX DEGREE: 28754
 Graph loaded: 1157828 vertices, 2987624 edges
-CPU BFS time: 49.1414 ms
-GPU bottom_up time: 16.802 ms
+CPU BFS time: 75.0609 ms
+GPU bottom_up time: 164.149 ms
 bottom_up passed verification.
 Running edge kernel...
 ./bfs_test edge com-youtube.ungraph.txt
 MAX DEGREE: 28754
 Graph loaded: 1157828 vertices, 2987624 edges
-CPU BFS time: 50.5127 ms
-GPU edge time: 9.3127 ms
+CPU BFS time: 50.9016 ms
+GPU edge time: 148.599 ms
 edge passed verification.
-Running edge kernel...
+Running edge stream kernel...
 ./bfs_test edge_stream com-youtube.ungraph.txt
 MAX DEGREE: 28754
 Graph loaded: 1157828 vertices, 2987624 edges
-CPU BFS time: 44.2331 ms
-GPU edge_stream time: 165.434 ms
+CPU BFS time: 46.5033 ms
+GPU edge_stream time: 295.693 ms
 edge_stream passed verification.
+Running opt kernel...
+./bfs_test opt com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 42.5819 ms
+GPU opt time: 166.485 ms
+opt passed verification.
+Running opt_dp kernel...
+./bfs_test opt_dp com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 39.8963 ms
+GPU opt_dp time: 153.662 ms
+opt_dp passed verification.
+Running opt_dp_driver kernel...
+./bfs_test opt_dp_driver com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 41.0324 ms
+GPU opt_dp_driver time: 148.955 ms
