@@ -1,0 +1,29 @@
+nvcc -O3 -arch=sm_86 -o bfs_test main.cu
+Running top_down kernel...
+./bfs_test top_down com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 50.9287 ms
+GPU top_down time: 20.852 ms
+top_down passed verification.
+Running bottom_up kernel...
+./bfs_test bottom_up com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 49.1414 ms
+GPU bottom_up time: 16.802 ms
+bottom_up passed verification.
+Running edge kernel...
+./bfs_test edge com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 50.5127 ms
+GPU edge time: 9.3127 ms
+edge passed verification.
+Running edge kernel...
+./bfs_test edge_stream com-youtube.ungraph.txt
+MAX DEGREE: 28754
+Graph loaded: 1157828 vertices, 2987624 edges
+CPU BFS time: 44.2331 ms
+GPU edge_stream time: 165.434 ms
+edge_stream passed verification.
