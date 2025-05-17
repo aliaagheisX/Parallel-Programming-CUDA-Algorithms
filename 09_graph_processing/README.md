@@ -61,3 +61,16 @@ __global__ void bfs_vertix_opt3(int* nodesPtr, int* neigbors, int* levels, int *
 																int** prev_frontier, int** curr_frontier,
 																int* sz_prev_frontier, int* sz_curr_frontier);
 ```
+
+
+## Dynamic Programing
+in `dynamic_programming.cu`
+```cpp
+//launch another grid of threads if neighbors_count > 1024
+__global__ void bfs_vertix_dp(int* nodesPtr, int* neighbors, int* levels, int curr_level,
+                              int* prev_frontier, int* curr_frontier,
+                              const int sz_prev_frontier, int* sz_curr_frontier);
+
+// act as driver to host code
+__global__ void bfs_dp_driver_kernel(int* nodesPtr, int* neighbors, int* levels, int* prev_frontier, int* curr_frontier, int* sz_prev_frontier, int* sz_curr_frontier);
+```
