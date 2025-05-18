@@ -67,7 +67,7 @@ at::Tensor matrix_mult_coarsing(at::Tensor A, at::Tensor B) {
 
     // int shared_mem_size = I_TILE_DIM * I_TILE_DIM * sizeof(float);
     dim3 threads_per_block(I_TILE_DIM, I_TILE_DIM);
-    dim3 number_of_blocks(CEIL_DIV(M, I_TILE_DIM),
+    dim3 number_of_blocks(1,
                           CEIL_DIV(N, I_TILE_DIM));
 
     
