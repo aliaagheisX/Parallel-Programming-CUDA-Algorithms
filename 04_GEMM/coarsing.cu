@@ -19,16 +19,17 @@ __global__ void matrix_mult_coarsing_kernel(const float *A, const float *B, floa
     float tempVal[MAX_COARSING_FACTOR] = {0.0};
     
     for(int tile = 0; tile < K; tile += I_TILE_DIM) {
+        
+        int tiledRow = tile + threadIdx.y;
+        int tiledCol = tile + threadIdx.x;
+        // Load A tile
+        if (row < N && tiledCol < K)
+            Ash[threadIdx.y][threadIdx.x] = A[INDEX(row, tiledCol, K)];
+        else
+            Ash[threadIdx.y][threadIdx.x] = 0.0f;
+
         for(int b_tile_counter = 0;b_tile_counter < coarsing_factor;b_tile_counter++) {
             const uint col = b_tile_counter * I_TILE_DIM + threadIdx.x;
-        
-            int tiledRow = tile + threadIdx.y;
-            int tiledCol = tile + threadIdx.x;
-            // Load A tile
-            if (row < N && tiledCol < K)
-                Ash[threadIdx.y][threadIdx.x] = A[INDEX(row, tiledCol, K)];
-            else
-                Ash[threadIdx.y][threadIdx.x] = 0.0f;
             // Load B tile
             if (tiledRow < K && col < M)
                 Bsh[threadIdx.y][threadIdx.x] = B[INDEX(tiledRow, col, M)];
