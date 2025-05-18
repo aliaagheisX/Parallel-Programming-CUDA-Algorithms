@@ -1,49 +1,57 @@
-// #include <torch/extension.h>
+#include <torch/extension.h>
 #include <ATen/ATen.h>
 #include <iostream>
 
 #define I_TILE_DIM 8
 #define CEIL_DIV(X, Y) (X+Y-1)/Y
 #define INDEX(Y, X, W) (X + Y * W)
+#define MAX_COARSING_FACTOR 32
 
 __global__ void matrix_mult_coarsing_kernel(const float *A, const float *B, float *C, const int N, const int K, const int M) {
 
+    const uint coarsing_factor = CEIL_DIV(M, I_TILE_DIM);
     const uint row = threadIdx.y + blockIdx.y * blockDim.y;
-    const uint col = threadIdx.x + blockIdx.x * blockDim.x;
+    // const uint col = threadIdx.x + blockIdx.x * blockDim.x;
 
     __shared__ float Ash[I_TILE_DIM][I_TILE_DIM];
     __shared__ float Bsh[I_TILE_DIM][I_TILE_DIM];
     
-    float tempVal = 0.0;
+    float tempVal[MAX_COARSING_FACTOR] = {0.0};
     
     for(int tile = 0; tile < K; tile += I_TILE_DIM) {
+        for(int b_tile_counter = 0;b_tile_counter < coarsing_factor;b_tile_counter++) {
+            const uint col = b_tile_counter * I_TILE_DIM + threadIdx.x;
         
-        int tiledRow = tile + threadIdx.y;
-        int tiledCol = tile + threadIdx.x;
-        // Load A tile
-        if (row < N && tiledCol < K)
-            Ash[threadIdx.y][threadIdx.x] = A[INDEX(row, tiledCol, K)];
-        else
-            Ash[threadIdx.y][threadIdx.x] = 0.0f;
-        // Load B tile
-        if (tiledRow < K && col < M)
-            Bsh[threadIdx.y][threadIdx.x] = B[INDEX(tiledRow, col, M)];
-        else
-            Bsh[threadIdx.y][threadIdx.x] = 0.0f;
+            int tiledRow = tile + threadIdx.y;
+            int tiledCol = tile + threadIdx.x;
+            // Load A tile
+            if (row < N && tiledCol < K)
+                Ash[threadIdx.y][threadIdx.x] = A[INDEX(row, tiledCol, K)];
+            else
+                Ash[threadIdx.y][threadIdx.x] = 0.0f;
+            // Load B tile
+            if (tiledRow < K && col < M)
+                Bsh[threadIdx.y][threadIdx.x] = B[INDEX(tiledRow, col, M)];
+            else
+                Bsh[threadIdx.y][threadIdx.x] = 0.0f;
 
+                
+            __syncthreads();
             
-        __syncthreads();
-        
-        if(row < N && col < M) {
-            for(int i = 0;i < I_TILE_DIM;i++) {
-                tempVal += Ash[threadIdx.y][i] * Bsh[i][threadIdx.x];
+            if(row < N && col < M) {
+                for(int i = 0;i < I_TILE_DIM;i++) {
+                    tempVal[b_tile_counter] += Ash[threadIdx.y][i] * Bsh[i][threadIdx.x];
+                }
             }
+            __syncthreads();
         }
-        __syncthreads();
     }
     
-    if(row < N && col < M) {
-        C[INDEX(row, col, M)] = tempVal;
+    for(int b_tile_counter = 0;b_tile_counter < coarsing_factor;b_tile_counter++) {
+        const uint col = b_tile_counter * I_TILE_DIM + threadIdx.x;
+        if(row < N && col < M) {
+            C[INDEX(row, col, M)] = tempVal[b_tile_counter];
+        }
     }
 }
 
@@ -82,6 +90,6 @@ at::Tensor matrix_mult_coarsing(at::Tensor A, at::Tensor B) {
 }
 
 
-// PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-//     m.def("matrix_mult_simple", &matrix_mult_simple, "matrix_mult_simple");
-// }
+PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
+    m.def("matrix_mult_coarsing", &matrix_mult_coarsing, "matrix_mult_coarsing");
+}
